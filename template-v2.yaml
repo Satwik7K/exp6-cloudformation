@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Experiment 6 - Version 2 - adds SNS topic and tags
+
+Parameters:
+  EnvName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, test, prod]
+
+Resources:
+  AppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvName
+
+  AppTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub exp6-table-${EnvName}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvName
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub exp6-alerts-${EnvName}
+
+Outputs:
+  BucketName:
+    Value: !Ref AppBucket
+  TableName:
+    Value: !Ref AppTable
+  TopicArn:
+    Value: !Ref AlertTopic
